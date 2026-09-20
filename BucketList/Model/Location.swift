@@ -2,7 +2,7 @@ import Foundation
 import MapKit
 
 struct MapLocation: Identifiable, Equatable, Codable {
-    let id: UUID
+    var id: UUID
     var name: String
     var description: String
     var latitude: Double
