@@ -1,0 +1,15 @@
+import Foundation
+
+struct NetworkHelper {
+    func fetchNearbyPlaces(location: MapLocation) async throws -> [Page] {
+        let urlString = "https://en.wikipedia.org/w/api.php?ggscoord=\(location.latitude)%7C\(location.longitude)&action=query&prop=coordinates%7Cpageimages%7Cpageterms&colimit=50&piprop=thumbnail&pithumbsize=500&pilimit=50&wbptterms=description&generator=geosearch&ggsradius=10000&ggslimit=50&format=json"
+
+        guard let url = URL(string: urlString) else {
+            print("Bad URL: \(urlString)")
+            throw URLError(.badURL)
+        }
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let items = try JSONDecoder().decode(Result.self, from: data)
+            return items.query.pages.values.sorted()
+    }
+}
