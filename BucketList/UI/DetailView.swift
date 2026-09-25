@@ -13,13 +13,35 @@ struct DetailView: View {
                     TextField("Place name", text: $detailViewModel.name)
                     TextField("Description", text: $detailViewModel.description)
                 }
+                Section("Also nearby...") {
+                    switch detailViewModel.loadingState {
+                    case .loading:
+                        HStack {
+                            ProgressView()
+                            Text("Loading...")
+                        }
+
+                    case .loaded:
+                        ForEach(detailViewModel.pages, id: \.pageid) { page in
+                            HStack {
+                                Text("**\(page.title)**: \(page.description)")
+                            }
+                        }
+
+                    case .failed:
+                        Text("Failed to load nearby places")
+                    }
+                }
             }
             .navigationTitle("Place detail")
             .toolbar {
                 Button("Save") {
-                    detailViewModel.save()
+                    detailViewModel.saveLocation()
                     dismiss()
                 }
+            }
+            .task {
+                await detailViewModel.loadNearbyPlaces(location: location)
             }
         }
     }
