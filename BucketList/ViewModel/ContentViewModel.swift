@@ -6,7 +6,8 @@ import LocalAuthentication
 @Observable
 final class ContentViewModel {
 
-    var isUnlocked = true
+    let context = LAContext()
+    var isUnlocked = false
     let position = MapCameraPosition.region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 56, longitude: -3),
@@ -52,13 +53,12 @@ final class ContentViewModel {
     }
 
     func authenticate() {
-        let context = LAContext()
         var error: NSError?
 
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
             let reason = "Please authenticate yourself to unlock your places"
 
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, authenticationError in
                 Task { @MainActor in
                     if success {
                         self.isUnlocked = true
