@@ -3,12 +3,14 @@ import MapKit
 import SwiftUI
 
 @Observable
-class DetailViewModel {
-    var id = UUID()
+final class DetailViewModel {
     var name: String
     var description: String
     private var originalLocation: MapLocation
     var onSave: (MapLocation) -> Void
+    var loadingState = LoadingStates.loading
+    var pages = [Page]()
+    private let networkHelper = NetworkHelper()
 
     init(location: MapLocation, onSave: @escaping (MapLocation) -> Void) {
         self.originalLocation = location
@@ -17,14 +19,23 @@ class DetailViewModel {
         self.onSave = onSave
     }
 
-    func save() {
+    func saveLocation() {
         let updatedLocation = MapLocation(
-            id: id,
+            id: originalLocation.id,
             name: name,
             description: description,
             latitude: originalLocation.latitude,
             longitude: originalLocation.longitude
         )
         onSave(updatedLocation)
+    }
+    func loadNearbyPlaces(location: MapLocation) async {
+        do {
+            pages = try await networkHelper.fetchNearbyPlaces(location: location)
+            loadingState = .loaded
+        } catch {
+            loadingState = .failed
+        }
+        
     }
 }
